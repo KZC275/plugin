@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	<title>lunbo</title>
+	<script src='jquery.js'></script>
+	<style>
+		body{
+			margin:0;
+			padding: 0;
+		}
+		span:nth-child(1){
+			background: yellow;
+		}
+		span:nth-child(2){
+			background: blue;
+		}
+		span:nth-child(3){
+			background: pink;
+		}
+	
+	</style>
+</head>
+
+<body>
+	<div class="content">
+		<div class="wrapper">
+			<span>yellow</span>
+			<span>blue</span>
+			<span>pink</span>
+		</div>
+	</div>
+	<script>
+		(function($){
+
+			$.slide=function(opts){
+				obj.init(opts)
+			}
+			var timer_ac=null;//定時器
+			var params=null; //全局参数
+			var status_img=0;//輪播位置初始化
+				var obj={
+					init:function(opts){
+						var _default = {
+						    wrapper: null,
+						    item: {
+						    	'width':'300px',
+						    	'height':'150px'
+						    },  
+						    
+						}
+						 params = $.extend(true, {}, _default, opts);
+						if(!params.item||!params.wrapper){
+							alert('参数错误');
+							return false;
+						}
+						this.shapeUp(params);
+						this.auto_move(params,status_img);
+						this.go_to_destination(params);
+						this.intervene(params);
+
+					},
+					shapeUp:function(params){
+						
+						// item元素浮动同时重设宽高
+						params.wrapper.children().css({
+							'float':'left',
+							'width':params.item.width,
+							'height':params.item.height
+						});
+						// 计算wrapper长度
+						var length=parseInt(params.item.width)*(params.wrapper.children().length+1);
+						//复制一张图片在最后达到无缝连接的效果
+						params.wrapper.append(params.wrapper.children().eq(0).clone(true).css('background','yellow'));
+
+						params.wrapper.css({'width':length,'height':params.item.height});
+						// console.log(length);
+						// content宽高
+						params.wrapper.parents('div').eq(0).css({
+							'width':params.item.width,
+							'height':params.item.height,
+							'overflow': 'hidden',
+							'position': 'relative'
+						});
+
+					},
+					auto_move:function(params,status){
+						//根据offset().left判断轮播图的当前位置
+						// 轮播
+							var i=parseInt(Math.abs(status)/parseInt(params.item.width));
+							// console.log(i)
+							params.wrapper.css('position', 'absolute');
+						timer_ac=setInterval(function(){
+							i++;
+							// if(i>=4){
+							// 	i=1;
+							// 	// 回到开始位置
+							// 	params.wrapper.css('transition', "none");
+							// 	params.wrapper.css('transform', 'translateX('+ ( 0 +'px' )  +')');
+							// 	// return;
+							// }
+							// params.wrapper.css('transform', 'translateX('+ ( -parseInt(params.item.width)*i +'px' )  +')');
+							// params.wrapper.css('transition', "0.7s ease");
+							// i++;
+
+
+							if(i>=4){
+								i=1;
+								// 回到开始位置
+								params.wrapper.css({'left':0});
+								// return;
+							}
+							params.wrapper.animate({'left': -parseInt(params.item.width)*i }, 100);
+							status_img=i//记录当前是第几张
+						
+						
+							// console.log(params.wrapper.css('left'))
+
+						},2000)
+
+					},
+					intervene:function(params){
+						
+						var initX = 0;
+						var current = 0;
+						var status_left=0;
+						params.wrapper[0].addEventListener('touchstart', function(event) {
+						    initX = event.touches[0].pageX;
+						    params.wrapper.css('transition', "none");
+						    clearInterval(timer_ac);//清除定時器
+
+						    status_left=parseInt(params.wrapper.css('left'));//记录wrapper位置，拖动时实时改变
+						    // console.log(status_left)
+						})
+						params.wrapper[0].addEventListener('touchmove', function(event) {
+							// console.log( params.wrapper.offset().left)
+							//光标移出有效范围
+							if(event.touches[0].pageX>params.wrapper.parents('div').eq(0).offset().left+parseInt(params.item.width)
+								||event.touches[0].pageY>params.wrapper.parents('div').eq(0).offset().top+parseInt(params.item.height))
+							{
+								return false;
+							}
+							// console.log(params.wrapper.parents('div').eq(0).offset())
+							// console.log(event.touches[0].pageX)
+						    //安卓手机不加上阻止默认事件，无法拖动
+						    event.preventDefault();
+						    current = event.touches[0].pageX - initX;
+
+						    // 当前是第一张图片而且是滑动到上一张的时候，马上把wrapper的克隆的那张图片置于可视区域
+						    if(current>0&&status_left==0){
+						    	status_left= -((params.wrapper.children().length)-1)*parseInt(params.item.width);
+						    	params.wrapper.css('left', status_left);
+						    }
+
+						    //css3方式
+						    // params.wrapper.css('transform', "translateX(" + (current + 'px') + ")");
+						    params.wrapper.css('left', current+ status_left);
+
+						})
+						params.wrapper[0].addEventListener('touchend', function(event) {
+							//没有移动，不做任何处理
+							if(current==0){
+								obj.auto_move(params,status_left);
+								return false;
+							}
+							//切换到下一张
+							if(Math.abs(current)>parseInt(params.item.width)/2&& current<0){
+								//css3方式
+								// params.wrapper.css('transform', "translateX(" + (-parseInt(params.item.width)*status_img + 'px') + ")");
+
+								// 最后的图片强制不切换
+								// if(Math.abs(status_left-parseInt(params.item.width))/parseInt(params.item.width)>=
+								// 	(params.wrapper.children().length)){
+								// 	// 此时params.wrapper.children()的长度包括了克隆的那个
+								// 	params.wrapper.css('left',  status_left);
+								// 	obj.auto_move(params , status_left);
+								// 	return false;
+								// }
+
+								// 可以循环滑动到下一张，原理是当最后一张到克隆的那一张时，瞬间把wrapper的position：left的值变为0，这就可以回到第一张，实现无限循环
+								if(Math.abs(status_left-parseInt(params.item.width))/parseInt(params.item.width)>=
+									(params.wrapper.children().length)-1){
+									params.wrapper.animate({'left': status_left-parseInt(params.item.width) }, 100,function(){
+											params.wrapper.css('left',  0);
+											obj.auto_move(params , 0);
+									});
+									
+									return false;
+								}
+
+
+
+								params.wrapper.css('left',  status_left-parseInt(params.item.width));
+								obj.auto_move(params,status_left-parseInt(params.item.width));
+							}
+							// 回到原位
+							else if(Math.abs(current)<=parseInt(params.item.width)/2){
+								params.wrapper.css('left', status_left);
+								obj.auto_move(params,status_left);
+
+							}
+							//切换到上一张
+							else if(Math.abs(current)>parseInt(params.item.width)/2&& current>0){
+								//css3方式
+								// params.wrapper.css('transform', "translateX(" + (-parseInt(params.item.width)*status_img + 'px') + ")");
+
+								// 第一张图片强制不切换
+								if(status_left+parseInt(params.item.width)>0){
+									
+									params.wrapper.css('left',  status_left);
+									obj.auto_move(params , status_left);
+									return false;
+								}
+
+								params.wrapper.css('left',  status_left+parseInt(params.item.width));
+								obj.auto_move(params,status_left+parseInt(params.item.width));
+							}
+
+
+						})
+
+
+					},
+					isDot:function(){
+
+					},
+					go_to_destination:function(params){
+						var target=params.wrapper.children()[0].nodeName.toLowerCase();
+						params.wrapper.on('touchend',target,function(event){
+							console.log(event.target.innerHTML)
+							console.log($(this).index())
+							if($(this).index()==0){
+								console.log(params.url[0])
+							}
+							
+						})
+
+					}
+				}
+			
+			
+
+			
+			
+
+		})(jQuery)
+
+
+		$.slide({
+				wrapper:$('.wrapper'),
+				item: {
+				    	'width':window.screen.width,
+				    	'height':'100px',
+				    },
+				 url:['http://www.baidu.com/','http://www.qq.com/']
+
+			})
+
+	</script>
+</body>
+</html>
