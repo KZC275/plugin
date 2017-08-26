@@ -40,6 +40,8 @@
 			var timer_ac=null;//定時器
 			var params=null; //全局参数
 			var status_img=0;//輪播位置初始化
+			var start_time=0;  //手指接触屏幕时间点
+			var end_time=0;  //手指离开屏幕时间点
 				var obj={
 					init:function(opts){
 						var _default = {
@@ -123,9 +125,12 @@
 					intervene:function(params){
 						
 						var initX = 0;
-						var current = 0;
 						var status_left=0;
+						var current = 0
 						params.wrapper[0].addEventListener('touchstart', function(event) {
+							current = 0;//每次点击都需要把差值置零，防止快速点击频繁触发轮播
+
+							start_time= new Date().getTime();//记录时间点
 						    initX = event.touches[0].pageX;
 						    params.wrapper.css('transition', "none");
 						    clearInterval(timer_ac);//清除定時器
@@ -159,13 +164,16 @@
 
 						})
 						params.wrapper[0].addEventListener('touchend', function(event) {
+							end_time= new Date().getTime();//记录时间点
+							var distance=end_time-start_time;//记录时间差,判断是否是快速滑动
 							//没有移动，不做任何处理
 							if(current==0){
 								obj.auto_move(params,status_left);
 								return false;
 							}
 							//切换到下一张
-							if(Math.abs(current)>parseInt(params.item.width)/2&& current<0){
+							if((distance<200&&current<0)
+								||(Math.abs(current)>parseInt(params.item.width)/2&& current<0)){
 								//css3方式
 								// params.wrapper.css('transform', "translateX(" + (-parseInt(params.item.width)*status_img + 'px') + ")");
 
@@ -195,23 +203,25 @@
 								obj.auto_move(params,status_left-parseInt(params.item.width));
 							}
 							// 回到原位
-							else if(Math.abs(current)<=parseInt(params.item.width)/2){
+							else if((Math.abs(current)<=parseInt(params.item.width)/2)
+								&&(distance>=200)){
 								params.wrapper.css('left', status_left);
 								obj.auto_move(params,status_left);
 
 							}
 							//切换到上一张
-							else if(Math.abs(current)>parseInt(params.item.width)/2&& current>0){
+							else if((distance<200&&current>0)||
+								(Math.abs(current)>parseInt(params.item.width)/2&& current>0)){
 								//css3方式
 								// params.wrapper.css('transform', "translateX(" + (-parseInt(params.item.width)*status_img + 'px') + ")");
 
 								// 第一张图片强制不切换
-								if(status_left+parseInt(params.item.width)>0){
+								// if(status_left+parseInt(params.item.width)>0){
 									
-									params.wrapper.css('left',  status_left);
-									obj.auto_move(params , status_left);
-									return false;
-								}
+								// 	params.wrapper.css('left',  status_left);
+								// 	obj.auto_move(params , status_left);
+								// 	return false;
+								// }
 
 								params.wrapper.css('left',  status_left+parseInt(params.item.width));
 								obj.auto_move(params,status_left+parseInt(params.item.width));
@@ -253,7 +263,8 @@
 				    	'width':window.screen.width,
 				    	'height':'100px',
 				    },
-				 url:['http://www.baidu.com/','http://www.qq.com/']
+				 url:['http://www.baidu.com/','http://www.qq.com/'],
+				 quickSlide:200
 
 			})
 
