@@ -128,18 +128,31 @@
 						var status_left=0;
 						var current = 0
 						params.wrapper[0].addEventListener('touchstart', function(event) {
-							current = 0;//每次点击都需要把差值置零，防止快速点击频繁触发轮播
+							if(event.touches.length>1){
+								clearInterval(timer_ac);//清除定時器
+								console.log('lllllllllllllllldddddddddsssssssss');
+								return false;
+							}
+									// console.log(event.touches)
+									current = 0;//每次点击都需要把差值置零，防止快速点击频繁触发轮播
 
-							start_time= new Date().getTime();//记录时间点
-						    initX = event.touches[0].pageX;
-						    params.wrapper.css('transition', "none");
-						    clearInterval(timer_ac);//清除定時器
+									start_time= new Date().getTime();//记录时间点
+								    initX = event.touches[0].pageX;
+								    params.wrapper.css('transition', "none");
+								    clearInterval(timer_ac);//清除定時器
 
-						    status_left=parseInt(params.wrapper.css('left'));//记录wrapper位置，拖动时实时改变
-						    // console.log(status_left)
+								    status_left=parseInt(params.wrapper.css('left'));//记录wrapper位置，拖动时实时改变
+
+							
+							
 						})
 						params.wrapper[0].addEventListener('touchmove', function(event) {
-							// console.log( params.wrapper.offset().left)
+							if(event.touches.length>1){
+								clearInterval(timer_ac);//清除定時器
+								console.log('movemovemove');
+								return false;
+							}
+							console.log(event.touches)
 							//光标移出有效范围
 							if(event.touches[0].pageX>params.wrapper.parents('div').eq(0).offset().left+parseInt(params.item.width)
 								||event.touches[0].pageY>params.wrapper.parents('div').eq(0).offset().top+parseInt(params.item.height))
@@ -164,6 +177,13 @@
 
 						})
 						params.wrapper[0].addEventListener('touchend', function(event) {
+							 if(event.touches.length>1){
+							 	clearInterval(timer_ac);//清除定時器
+							 	console.log('endend');
+							 	return false;
+							 }
+
+							if(timer_ac)clearInterval(timer_ac);//清除定時器
 							end_time= new Date().getTime();//记录时间点
 							var distance=end_time-start_time;//记录时间差,判断是否是快速滑动
 							//没有移动，不做任何处理
@@ -229,6 +249,11 @@
 
 
 						})
+						params.wrapper[0].addEventListener('touchcancel', function(event) {
+							console.log('////////////////////////////////////')
+
+						})
+
 
 
 					},
@@ -236,15 +261,15 @@
 
 					},
 					go_to_destination:function(params){
-						var target=params.wrapper.children()[0].nodeName.toLowerCase();
-						params.wrapper.on('touchend',target,function(event){
-							console.log(event.target.innerHTML)
-							console.log($(this).index())
-							if($(this).index()==0){
-								console.log(params.url[0])
-							}
+						// var target=params.wrapper.children()[0].nodeName.toLowerCase();
+						// params.wrapper.on('touchend',target,function(event){
+						// 	console.log(event.target.innerHTML)
+						// 	console.log($(this).index())
+						// 	if($(this).index()==0){
+						// 		console.log(params.url[0])
+						// 	}
 							
-						})
+						// })
 
 					}
 				}
