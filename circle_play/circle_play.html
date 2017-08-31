@@ -32,9 +32,7 @@
 	<body>
 		<div class="content">
 			<div class="wrapper">
-				<div>
-					<p>2222222222</p>
-				</div>
+				<img src="1.png" alt="">
 				<img src="2.png" alt="">
 				<img src="3.png" alt="">
 				<img src="4.png" alt="">
@@ -69,7 +67,7 @@
 						}
 						this.shapeUp(params);
 						this.auto_move(params, status_img);
-						this.go_to_destination(params);
+						// this.go_to_destination(params);
 						this.intervene(params);
 
 					},
@@ -90,7 +88,6 @@
 							'width': length,
 							'height': params.item.height
 						});
-						// console.log(length);
 						// content宽高
 						params.wrapper.parents('div').eq(0).css({
 							'width': params.item.width,
@@ -104,7 +101,6 @@
 						//根据offset().left判断轮播图的当前位置
 						// 轮播
 						var i = parseInt(Math.abs(status) / parseInt(params.item.width));
-						// console.log(i)
 						params.wrapper.css('position', 'absolute');
 						var self=this;
 						if(i==0){
@@ -149,10 +145,8 @@
 						params.wrapper[0].addEventListener('touchstart', function(event) {
 							if(event.touches.length > 1) { //多根手指触摸干扰排除
 								clearInterval(timer_ac); //清除定時器
-								console.log('lllllllllllllllldddddddddsssssssss');
 								return false;
 							}
-							// console.log(event.touches)
 							current = 0; //每次点击都需要把差值置零，防止快速点击频繁触发轮播
 
 							start_time = new Date().getTime(); //记录时间点
@@ -166,7 +160,6 @@
 						params.wrapper[0].addEventListener('touchmove', function(event) {
 							if(event.touches.length > 1) {
 								clearInterval(timer_ac); //清除定時器
-								console.log('movemovemove');
 								return false;
 							}
 							//光标移出有效范围
@@ -174,8 +167,6 @@
 								event.touches[0].pageY > params.wrapper.parents('div').eq(0).offset().top + parseInt(params.item.height)) {
 								return false;
 							}
-							// console.log(params.wrapper.parents('div').eq(0).offset())
-							// console.log(event.touches[0].pageX)
 							//安卓手机不加上阻止默认事件，无法拖动
 							event.preventDefault();
 							current = event.touches[0].pageX - initX;
@@ -200,7 +191,6 @@
 						params.wrapper[0].addEventListener('touchend', function(event) {
 							if(event.touches.length > 1) {
 								clearInterval(timer_ac); //清除定時器
-								console.log('endend');
 								return false;
 							}
 
@@ -269,7 +259,6 @@
 
 						})
 						params.wrapper[0].addEventListener('touchcancel', function(event) {
-							console.log('////////////////////////////////////')
 
 						})
 
@@ -312,18 +301,15 @@
 						$('.dot_wrapper em').eq(num).css('background-color', 'green');
 
 					},
-					go_to_destination: function(params) {
-						// var target=params.wrapper.children()[0].nodeName.toLowerCase();
-						// params.wrapper.on('touchend',target,function(event){
-						// 	console.log(event.target.innerHTML)
-						// 	console.log($(this).index())
-						// 	if($(this).index()==0){
-						// 		console.log(params.url[0])
-						// 	}
+					// go_to_destination: function(params) {
+					// 	var target=params.wrapper.children()[0].nodeName.toLowerCase();
+					// 	params.wrapper.on('touchend',target,function(event){
+					// 		if($(this).index()==0){
+					// 		}
 
-						// })
+					// 	})
 
-					}
+					// }
 				}
 
 			})(jQuery)
@@ -334,7 +320,7 @@
 					'width': '200',
 					'height': '100px',
 				},
-				url: ['http://www.baidu.com/', 'http://www.qq.com/'],
+				// url: ['http://www.baidu.com/', 'http://www.qq.com/'],
 				quickSlide: 200,
 				time:2000,
 				is_point:true
