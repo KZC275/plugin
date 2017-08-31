@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+	<title>Document</title>
+	<script src='jquery.js'></script>
+
+</head>
+<body>
+<div style="background:red;">
+	<div class="wrap">
+		<span>1111</span>
+		<span>2222</span>
+		<span>77</span>
+		<span>4444</span>
+		<span>3333</span>
+		<span>3333</span>
+		<span>3333</span>
+		<span>3333</span>
+		<span>3333</span>
+		<span>3333</span>
+		<span>3333</span>
+		<span>3333</span>
+		<span>2222</span>
+		<span>1111</span>
+		<span>吴美丽</span>
+		<span>吴美丽</span>
+		<span>吴美丽</span>
+		<span>吴美丽</span>
+		<span>吴美丽</span>
+		<span>吴美丽</span>
+		<span>意大利</span>
+		<span>澳大利亚</span>
+		<span>吴美丽</span>
+		<span>厄瓜多尔</span>
+		<span>吴美丽</span>
+		
+</div>
+	<script>
+
+	var app={}
+	$('html').on("touchstart", function() {
+		app.isTouchMove = false;
+	});
+
+	$('html').on("touchmove", function() {
+		app.isTouchMove = true;
+	});
+		var app1={
+		drag:function(opts){
+			
+			var _default = {
+			    wrapperHeight: 40,  //tab 拖动高度
+			    itemMargin: 30,  //tab 子项左右间距
+			    el:null,      //拖动栏jq节点对象 
+			    item:null      //tab子项jq节点对象
+			}
+			var params = $.extend(true, {}, _default, opts);
+			if(!params.item||!params.el){
+				alert('参数错误');
+				return false;
+			}
+			params.item.css('float', 'left');
+			params.el.parents('div').eq(0).css('overflow', 'hidden');
+			params.el.parents('body').eq(0).css('margin', '0');
+			params.el.parents('body').eq(0).css('padding', '0');
+			var num = params.item.length;
+			var wrapLength = params.itemMargin * num + params.itemMargin; //拖动条的长度
+			for (var i = 0; i < num; i++) {
+			    wrapLength += parseInt(params.item.eq(i).width());
+
+			}
+			params.el.css('width', wrapLength);
+			params.el.css('height', params.wrapperHeight);
+			params.el.css('line-height', params.wrapperHeight + 'px');
+			params.item.css('margin-right', params.itemMargin);
+			params.item.eq(0).css('margin-left', params.itemMargin);
+			var initX = 0;
+			var current = 0;
+			var status = 0;
+			var startTime = 0;//记录时间差
+			var endTime = 0;
+
+			params.el[0].addEventListener('touchstart', function(event) {
+			    initX = event.touches[0].pageX;
+			    params.el.css('transition', "none");
+			    startTime = new Date().getTime();
+			})
+			params.el[0].addEventListener('touchmove', function(event) {
+			    //安卓手机不加上阻止默认事件，无法拖动
+			    event.preventDefault();
+			    current = event.touches[0].pageX - initX;
+
+			    //css3方式
+			    params.el.css('transform', "translateX(" + (current + status + 'px') + ")");
+
+			})
+			params.el[0].addEventListener('touchend', function(event) {
+					
+					 status += current;
+					 
+					if(app.isTouchMove==false){
+						return false;
+					}
+					endTime = new Date().getTime();
+					if( endTime - startTime < 200){//小于200毫秒才会有快速滑动效果
+						var length=parseInt( 20000 / ( endTime - startTime));//快速拖动，手机离开屏幕滑动距离
+						var paused=0;
+						var note=0;
+						var trick=0;
+			         	
+			         	if(current>0){
+			         		note+=10;
+			         		trick=30;//缓冲30px,优化体验
+			         	}else{
+			         		note-=10;
+			         		trick= -30;
+			         	}
+			         	var jjktime=setInterval(function(){
+			         	paused+=Math.abs(note);
+			         	 //判断是否超过左边界
+			         	if (params.el.offset().left > 0) {
+			         		clearInterval(jjktime);
+			         	    params.el.css('transform', "translateX(" + (0 + 'px') + ")");
+			         	    params.el.css('transition', "0.7s ease");
+			         	    status = 0;
+			         	}
+			         	 status += note;
+			         	// 判断是否超过右边界
+			         	if (Math.abs(status) > wrapLength - window.screen.width) {
+			         		clearInterval(jjktime);
+			         	    params.el.css('transform', "translateX(" + (-(wrapLength - window.screen.width) + 'px') + ")");
+			         	    params.el.css('transition', "0.7s ease");
+			         	    status = -(wrapLength - window.screen.width);
+			         	}
+			         	//css3方式
+			         	params.el.css('transform', "translateX(" + (note + status + 'px') + ")");
+			         	if(paused>=length){
+			         		clearInterval(jjktime);
+			         		if(params.el.offset().left < 0 || Math.abs(status) < wrapLength - window.screen.width ){
+			         			params.el.css('transform', "translateX(" + (trick + status + 'px') + ")");
+			         			params.el.css('transition', "0.4s ease");
+			         		}
+			         	}
+
+			         },10)
+
+					}else{
+						//判断是否超过左边界
+						 if (params.el.offset().left > 0) {
+						 	clearInterval(jjktime);
+						     params.el.css('transform', "translateX(" + (0 + 'px') + ")");
+						     params.el.css('transition', "0.7s ease");
+						     status = 0;
+						 }
+						 // 判断是否超过右边界
+						 if (Math.abs(status) > wrapLength - window.screen.width) {
+						 	clearInterval(jjktime);
+						     params.el.css('transform', "translateX(" + (-(wrapLength - window.screen.width) + 'px') + ")");
+						     params.el.css('transition', "0.7s ease");
+						     status = -(wrapLength - window.screen.width);
+						 }
+					}
+
+					current = 0; //移动距离置零,防止点击没有拖动也累加
+			         
+
+			    })
+			    //tab拖动结束*******************************************************
+
+
+		}
+	}
+	app1.drag({
+		el:$('.wrap'),
+		item:$('span')
+	})
+
+
+
+	</script>
+</body>
+</html>
